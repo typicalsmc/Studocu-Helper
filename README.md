@@ -26,13 +26,22 @@ Tính năng hỗ trợ lưu tài liệu về máy để in ấn hoặc đọc of
 
 ## 🛠 Hướng dẫn cài đặt
 
-Do đây là công cụ phát triển cá nhân (chưa đưa lên Store), bạn cần cài đặt thủ công qua chế độ Developer:
+Do đây là công cụ phát triển cá nhân (chưa đưa lên Store), bạn cần cài đặt thủ công qua chế độ Developer.
+
+### Firefox
 
 1. **Tải mã nguồn:** Tải file `.zip` của dự án về và giải nén (hoặc clone repository này).
-2. **Mở trình quản lý tiện ích:** Truy cập đường dẫn `chrome://extensions/` trên trình duyệt (Chrome, Edge, Cốc Cốc...).
-3. **Bật Developer Mode:** Gạt công tắc **"Developer mode"** ở góc trên bên phải màn hình.
-4. **Tải tiện ích:** Nhấn nút **"Load unpacked"** và chọn thư mục chứa mã nguồn vừa giải nén.
-dụng
+2. **Mở Debugging:** Truy cập `about:debugging#/runtime/this-firefox`.
+3. **Tải tiện ích tạm thời:** Nhấn **Load Temporary Add-on...**.
+4. **Chọn manifest:** Chọn file `manifest.json` trong thư mục mã nguồn.
+
+### Chrome / Edge / Cốc Cốc
+
+1. **Tải mã nguồn:** Tải file `.zip` của dự án về và giải nén (hoặc clone repository này).
+2. **Mở trình quản lý tiện ích:** Truy cập `chrome://extensions/`.
+3. **Bật Developer Mode:** Gạt công tắc **Developer mode** ở góc trên bên phải màn hình.
+4. **Tải tiện ích:** Nhấn **Load unpacked** và chọn thư mục chứa mã nguồn vừa giải nén.
+
 ## Cách sử dụng
 
 1. Truy cập vào tài liệu Studocu cần xem.

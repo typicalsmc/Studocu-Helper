@@ -1,3 +1,35 @@
+const extensionApi = globalThis.browser ?? globalThis.chrome;
+const usesPromiseOnlyApi = Boolean(globalThis.browser);
+
+function getRuntimeError() {
+    return extensionApi.runtime?.lastError;
+}
+
+function callExtensionApi(apiMethod, ...args) {
+    if (usesPromiseOnlyApi) {
+        return apiMethod(...args);
+    }
+
+    return new Promise((resolve, reject) => {
+        try {
+            const result = apiMethod(...args, (callbackResult) => {
+                const error = getRuntimeError();
+                if (error) {
+                    reject(new Error(error.message));
+                    return;
+                }
+                resolve(callbackResult);
+            });
+
+            if (result && typeof result.then === 'function') {
+                result.then(resolve, reject);
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 // Status
 function updateStatus(msg, isProcessing = false) {
     const statusText = document.getElementById('status-text');
@@ -21,23 +53,24 @@ document.getElementById('clearBtn').addEventListener('click', async () => {
     updateStatus("Đang quét và xóa cookie...", true);
     
     try {
-        const allCookies = await chrome.cookies.getAll({});
+        const allCookies = await callExtensionApi(extensionApi.cookies.getAll, {});
         let count = 0;
         for (const cookie of allCookies) {
             if (cookie.domain.includes('studocu')) {
                 let cleanDomain = cookie.domain.startsWith('.') ? cookie.domain.substring(1) : cookie.domain;
                 const protocol = cookie.secure ? "https:" : "http:";
                 const url = `${protocol}//${cleanDomain}${cookie.path}`;
-                await chrome.cookies.remove({ url: url, name: cookie.name, storeId: cookie.storeId });
+                await callExtensionApi(extensionApi.cookies.remove, { url: url, name: cookie.name, storeId: cookie.storeId });
                 count++;
             }
         }
         updateStatus(`Đã xóa ${count} cookies! Đang tải lại...`, false);
         
-        setTimeout(() => {
-            chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                if(tabs[0]) chrome.tabs.reload(tabs[0].id);
-            });
+        setTimeout(async () => {
+            const tabs = await callExtensionApi(extensionApi.tabs.query, { active: true, currentWindow: true });
+            if (tabs[0]) {
+                await callExtensionApi(extensionApi.tabs.reload, tabs[0].id);
+            }
         }, 1000);
         
     } catch (e) {
@@ -47,15 +80,15 @@ document.getElementById('clearBtn').addEventListener('click', async () => {
 
 // Pê đê ép 
 document.getElementById('checkBtn').addEventListener('click', async () => {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const [tab] = await callExtensionApi(extensionApi.tabs.query, { active: true, currentWindow: true });
     
     // Inject viewer styles
-    chrome.scripting.insertCSS({
+    await callExtensionApi(extensionApi.scripting.insertCSS, {
         target: { tabId: tab.id },
         files: ["viewer_styles.css"]
     });
 
-    chrome.scripting.executeScript({
+    await callExtensionApi(extensionApi.scripting.executeScript, {
         target: { tabId: tab.id },
         func: runCleanViewer
     });
